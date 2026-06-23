@@ -22,13 +22,13 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        targets: wasm32-unknown-unknown
+        targets: wasm32v1-none
 
     - name: Cache Cargo Dependencies
       uses: swatinem/rust-cache@v2
 
     - name: Verify Contract Compilation
-      run: cargo build --target wasm32-unknown-unknown --release
+      run: cargo build --target wasm32v1-none --release
 
     - name: Run Test Suites
       run: cargo test --workspace
