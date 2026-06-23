@@ -1,45 +1,47 @@
-# BountyHex ⬢
+# Contributing to BountyHex
 
-BountyHex is a trustless, automated open-source bounty protocol built on the Stellar network using Soroban smart contracts. It enables project maintainers to lock funds (USDC or XLM) directly to GitHub issues and automatically distributes rewards to contributors the moment their Pull Request is merged.
+Thanks for considering a contribution. BountyHex is small and focused right now, which means there's real room to shape it — from the contract itself to the automation and frontend layers described in the [roadmap](./README.md#roadmap).
 
----
+## Ways to contribute
 
-## 🚀 How It Works
+- **Smart contract** (`contracts/bounty_escrow`) — new functionality, additional test coverage, gas/resource optimization, security review.
+- **GitHub Action** (planned) — the merge-triggered settlement bot described in the roadmap.
+- **Dashboard** (planned) — the React/Freighter maintainer UI described in the roadmap.
+- **Docs** — clarifying setup steps, writing guides, fixing anything confusing in this repo.
 
-1. **Fund**: A project maintainer creates an issue and locks a bounty amount into a dedicated Soroban escrow contract using their Stellar wallet.
-2. **Build**: An open-source contributor claims the issue, writes the code, and submits a Pull Request linking to the issue.
-3. **Merge & Pay**: Once the maintainer approves and merges the PR, a automated GitHub Action verifies the merge and triggers the Soroban contract to release the locked tokens directly to the contributor's Stellar address.
+If you're looking for a place to start, check issues tagged [`good first issue`](https://github.com/TeethakingBuilds/BountyHex/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22). If nothing's tagged yet, open an issue describing what you'd like to work on before sending a PR — it saves everyone time if the approach gets agreed on first.
 
-## 🛠️ Architecture & Tech Stack
+## Local setup
 
-BountyHex utilizes a hybrid on-chain/off-chain model:
+You'll need:
 
-*   **On-Chain Layer (`/contracts`)**: Built in **Rust** using the **Soroban SDK**. It handles secure escrow states, maintainer refunds, and cryptographic multi-auth triggers for releasing bounties.
-*   **Automation Layer (`/github-action`)**: Built in **JavaScript/TypeScript** using the Node.js GitHub Actions toolkit and `@stellar/stellar-sdk`. It signs the automated release payloads upon successful PR mergers.
-*   **Frontend Dashboard (`/dashboard`)**: A **React/TypeScript** and **Tailwind CSS** application implementing `@stellar/freighter-api` for seamless maintainer interactions.
+- [Rust](https://www.rust-lang.org/tools/install) (stable) with the `wasm32-unknown-unknown` target:
+  ```bash
+  rustup target add wasm32-unknown-unknown
+  ```
+- [`stellar-cli`](https://developers.stellar.org/docs/tools/cli) if you want to deploy to testnet/futurenet, not required just to build and test.
 
----
-
-## 🤝 Contributing
-
-We love open-source contributions! Whether you want to optimize our Rust contracts, enhance the JavaScript automation scripts, or improve the UI, you are welcome here.
-
-### Local Development Setup
-
-1. **Clone the repository:**
 ```bash
-   git clone [https://github.com/TeethakingBuilds/BountyHex.git](https://github.com/TeethakingBuilds/BountyHex.git)
-   cd BountyHex
-Compile the Soroban Smart Contracts:
-Ensure you have stellar-cli installed, then run:
+git clone https://github.com/TeethakingBuilds/BountyHex.git
+cd BountyHex
+cargo build --target wasm32-unknown-unknown --release
+cargo test --package bounty_escrow
+```
 
-Bash
-   cargo build --target wasm32-unknown-unknown --release
-Run Contract Tests:
+## Making a contract change
 
-Bash
-   cargo test --package bounty_escrow
-Please read our CONTRIBUTING.md (coming soon) for details on our code of conduct and the process for submitting pull requests to us.
+1. Open an issue first for anything beyond a small fix — contract changes affect fund safety, so it's worth agreeing on the approach before code is written.
+2. Every new code path needs a test. The existing suite in [`src/test.rs`](./contracts/bounty_escrow/src/test.rs) covers happy paths, auth requirements, and double-settlement guards — follow that pattern (one fixture via `setup()`, one behavior per test).
+3. Run `cargo test --package bounty_escrow` locally before opening a PR. CI runs the same command on every push and PR — it must be green before merge.
+4. Keep `unsafe`, panics-as-control-flow, and storage layout changes to a minimum, and call them out explicitly in your PR description if unavoidable — these are the things a security reviewer will look at first.
 
-📜 License
-This project is licensed under the MIT License.
+## Pull requests
+
+- Reference the issue your PR addresses.
+- Describe *what changed* and *why*, not just *what the diff says* — the why matters more for contract code.
+- Keep PRs scoped to one concern. A contract fix and a README typo fix should be two PRs.
+- Be patient — this is a small project maintained part-time, but every PR gets a response.
+
+## Code of conduct
+
+Be respectful, be constructive, assume good faith. Disagreements about approach are normal and welcome; personal attacks aren't.
