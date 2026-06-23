@@ -1,0 +1,34 @@
+name: Soroban Smart Contract CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Build and Test Contracts
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Install Rust Toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        targets: wasm32-unknown-unknown
+
+    - name: Cache Cargo Dependencies
+      uses: swatinem/rust-cache@v2
+
+    - name: Verify Contract Compilation
+      run: cargo build --target wasm32-unknown-unknown --release
+
+    - name: Run Test Suites
+      run: cargo test --workspace
