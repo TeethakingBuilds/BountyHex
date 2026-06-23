@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "contracts/bounty_escrow"
+]
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+lto = true
